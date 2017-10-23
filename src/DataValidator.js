@@ -7,13 +7,13 @@ class DataValidator {
     this.data = data
     this.model = model
     this.errors = null
-    //TODO: validate model validators are well defined
   }
 
   call() {
     this._attributes().forEach(attribute => {
       const type = this._type(attribute);
-      if (typeof type !== 'object') this._validate(attribute)
+      if(type === undefined) throw new Error(`Missing type for attribute '${attribute}'`)
+      else if (typeof type !== 'object') this._validate(attribute)
       else {
         const errors = new DataValidator(type, this.data[attribute]).call()
         if(errors) this._addError(attribute, 'is not valid')
