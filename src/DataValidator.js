@@ -49,7 +49,7 @@ class DataValidator {
 
   _validateInclusion(attribute) {
     const list = this._inclusion(attribute)
-    const isIncluded = InclusionValidator.call(attribute, list)
+    const isIncluded = InclusionValidator.call(this.data[attribute], list)
     if (!isIncluded) this._addError(attribute, 'is not included in the list')
   }
 
