@@ -1,5 +1,5 @@
 {
-  "name": "data-validator",
+  "name": "object-data-validator",
   "version": "1.0.0",
   "description": "JS Objects data validator",
   "main": "index.js",
