@@ -200,7 +200,6 @@ describe("DataValidatorTest", () => {
 
           it('returns an error', () => {
             const errors = validator(model, data).call()
-            console.log(errors)
             expect(errors.birthDate).to.have.lengthOf(1)
             expect(errors.birthDate[0]).to.equal('is not valid')
           })
@@ -228,7 +227,7 @@ describe("DataValidatorTest", () => {
     })
   })
 
-  describe('compose types', () => {
+  describe('composed types', () => {
     const model = {
       file: {
         type: {
@@ -273,6 +272,52 @@ describe("DataValidatorTest", () => {
         const errors = validator(model, data).call()
         expect(errors.file).to.have.lengthOf(1)
         expect(errors.file[0]).to.equal('is not valid')
+      })
+    })
+
+    describe('when composed type can be nullable', () => {
+      describe('given null value', () => {
+        const data = { file: null }
+
+        it('does not return any errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors).to.equal(null)
+        })
+      })
+
+      describe('given undefined value', () => {
+        const data = { file: undefined }
+
+        it('does not return any errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors).to.equal(null)
+        })
+      })
+    })
+
+    describe('when composed type can not be nullable', () => {
+      beforeEach(() => {
+        model.file.nullable = false
+      })
+
+      describe('given null value', () => {
+        const data = { file: null }
+
+        it('returns an errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors.file).to.have.lengthOf(1)
+          expect(errors.file[0]).to.equal('must be given')
+        })
+      })
+
+      describe('given undefined value', () => {
+        const data = { file: undefined }
+
+        it('returns an errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors.file).to.have.lengthOf(1)
+          expect(errors.file[0]).to.equal('must be given')
+        })
       })
     })
   })
