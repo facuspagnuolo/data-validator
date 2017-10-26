@@ -322,6 +322,346 @@ describe("DataValidatorTest", () => {
     })
   })
 
+  describe('has many', () => {
+
+    describe('nullable', () => {
+      describe('when no nullable definition is given', () => {
+        const model = {
+          id: { type: DataTypes.INTEGER, many: true },
+        }
+
+        describe('when a value is present', () => {
+          const data = { id: [1] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when the list is empty', () => {
+          const data = { id: [] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when the value is not present', () => {
+          const data = { }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+      })
+
+      describe('when can be nullable', () => {
+        const model = {
+          id: { type: DataTypes.INTEGER, nullable: true, many: true },
+        }
+
+        describe('when the value is present', () => {
+          const data = { id: [1] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when the list is empty', () => {
+          const data = { id: [] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when the value is not present', () => {
+          const data = { }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+      })
+
+      describe('when can not be nullable', () => {
+        const model = {
+          id: { type: DataTypes.INTEGER, nullable: false, many: true },
+        }
+
+        describe('when the value is present', () => {
+          const data = { id: [1] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when the list is empty', () => {
+          const data = { id: [] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when the value is not present', () => {
+          const data = { }
+
+          it('returns a must be given error', () => {
+            const errors = validator(model, data).call()
+            expect(errors.id).to.have.lengthOf(1)
+            expect(errors.id[0]).to.equal('must be given')
+          })
+        })
+      })
+    })
+
+    describe('primitive types', () => {
+      describe('given a simple model', () => {
+        const model = {
+          id: { type: DataTypes.INTEGER },
+          jobs: {
+            many: true,
+            type: DataTypes.STRING,
+            inclusion: ['first job', 'second job']
+          },
+        }
+
+        describe('given some data that applies given definition', () => {
+          const data = { id: 1, jobs: ['first job', 'second job'] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('given non full data that applies given definition', () => {
+          const data = { id: 1 }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('given some data with an null value for the list', () => {
+          const data = { id: 1, jobs: [] }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('given some data with an invalid value for the list', () => {
+          const data = { id: 2, jobs: [1] }
+
+          it('returns an error', () => {
+            const errors = validator(model, data).call()
+            expect(errors.jobs).to.have.lengthOf(2)
+            expect(errors.jobs[0]).to.equal('is not valid')
+            expect(errors.jobs[1]).to.equal('is not included in the list')
+          })
+        })
+
+        describe('given some data with an non-accepted value for the list', () => {
+          const data = { id: 2, jobs: ['z'] }
+
+          it('returns an error', () => {
+            const errors = validator(model, data).call()
+            expect(errors.jobs).to.have.lengthOf(1)
+            expect(errors.jobs[0]).to.equal('is not included in the list')
+          })
+        })
+
+        describe('given some invalid data', () => {
+          const data = { id: /abc/, jobs: [2, 'second job'] }
+
+          it('returns an error', () => {
+            const errors = validator(model, data).call()
+
+            expect(errors.id).to.have.lengthOf(1)
+            expect(errors.id[0]).to.equal('is not valid')
+
+            expect(errors.jobs).to.have.lengthOf(2)
+            expect(errors.jobs[0]).to.equal('is not valid')
+            expect(errors.jobs[1]).to.equal('is not included in the list')
+          })
+        })
+      })
+
+      describe('given a model with date type', () => {
+        describe('when no format is specified', () => {
+          const model = {
+            birthDate: { type: DataTypes.DATE, many: true }
+          }
+
+          describe('given an invalid date', () => {
+            const data = { birthDate: ['1-1-11-1'] }
+
+            it('returns an error', () => {
+              const errors = validator(model, data).call()
+              expect(errors.birthDate).to.have.lengthOf(1)
+              expect(errors.birthDate[0]).to.equal('is not valid')
+            })
+          })
+
+          describe('given parseable dates', () => {
+            const data = { birthDate: ['2017-1-1', '2017-1-1'] }
+
+            it('does not return an error', () => {
+              const errors = validator(model, data).call()
+              expect(errors).to.equal(null)
+            })
+          })
+        })
+
+        describe('when a format is specified', () => {
+          const model = {
+            birthDate: { type: DataTypes.DATE, dateFormat: 'DD/MM/YYYY' }
+          }
+
+          describe('given an invalid date', () => {
+            const data = { birthDate: ['Z'] }
+
+            it('returns an error', () => {
+              const errors = validator(model, data).call()
+              expect(errors.birthDate).to.have.lengthOf(1)
+              expect(errors.birthDate[0]).to.equal('is not valid')
+            })
+          })
+
+          describe('given a parseable date with invalid format', () => {
+            const data = { birthDate: ['2017-1-1', '2017-01-01'] }
+
+            it('returns an error', () => {
+              const errors = validator(model, data).call()
+              expect(errors.birthDate).to.have.lengthOf(2)
+              expect(errors.birthDate[0]).to.equal('is not valid')
+              expect(errors.birthDate[1]).to.equal('is not valid')
+            })
+          })
+
+          describe('given a parseable date with a valid format', () => {
+            const data = { birthDate: ['01/01/2017', '01/02/2017'] }
+
+            it('does not return an error', () => {
+              const errors = validator(model, data).call()
+              expect(errors).to.equal(null)
+            })
+          })
+        })
+      })
+    })
+
+    describe('composed types', () => {
+      const model = {
+        files: {
+          many: true,
+          type: {
+            id: { type: DataTypes.INTEGER, nullable: false },
+            name: { type: DataTypes.STRING, nullable: false }
+          }
+        }
+      }
+
+      describe('given some data that applies given definition', () => {
+        const data = { files: [{ id: 1, name: 'charly' }, { id: 2, name: 'john' }] }
+
+        it('does not return any errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors).to.equal(null)
+        })
+      })
+
+      describe('given some data with extra types', () => {
+        const data = { files: [{ id: 1, name: 'charly', extra: true }, { id: 2, name: 'john' }] }
+
+        it('does not return any errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors).to.equal(null)
+        })
+      })
+
+      describe('given some data with invalid types', () => {
+        const data = { files: [{ id: 1, name: 2 }, { id: 2, name: 'john' }] }
+
+        it('returns an errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors.files).to.have.lengthOf(1)
+          expect(errors.files[0]).to.equal('is not valid')
+        })
+      })
+
+      describe('given some data with missing types', () => {
+        const data = { files: [{ id: 1, name: 'charly' }, { id: 2 }] }
+
+        it('returns an errors', () => {
+          const errors = validator(model, data).call()
+          expect(errors.files).to.have.lengthOf(1)
+          expect(errors.files[0]).to.equal('is not valid')
+        })
+      })
+
+      describe('when composed type can be nullable', () => {
+        describe('given null value', () => {
+          const data = { files: null }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('given undefined value', () => {
+          const data = { files: undefined }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+      })
+
+      describe('when composed type can not be nullable', () => {
+        beforeEach(() => {
+          model.files.nullable = false
+        })
+
+        describe('given null value', () => {
+          const data = { files: null }
+
+          it('returns an errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors.files).to.have.lengthOf(1)
+            expect(errors.files[0]).to.equal('must be given')
+          })
+        })
+
+        describe('given undefined value', () => {
+          const data = { files: undefined }
+
+          it('returns an errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors.files).to.have.lengthOf(1)
+            expect(errors.files[0]).to.equal('must be given')
+          })
+        })
+      })
+    })
+  })
+
   function validator(model, data) {
     return new DataValidator(model, data)
   }

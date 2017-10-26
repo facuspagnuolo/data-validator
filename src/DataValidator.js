@@ -16,11 +16,14 @@ class DataValidator {
       else if (typeof type !== 'object') this._validate(attribute)
       else {
         this._validate(attribute)
-        const value = this.data[attribute];
+        let values = this.data[attribute];
         const composedValidationFailed = this.errors && this.errors[attribute]
-        if(!composedValidationFailed && value) {
-          const errors = new DataValidator(type, value).call()
-          if(errors) this._addError(attribute, 'is not valid')
+        if(!composedValidationFailed && values) {
+          if(!Array.isArray(values)) values = [values]
+          values.forEach(value => {
+            const errors = new DataValidator(type, value).call()
+            if(errors) this._addError(attribute, 'is not valid')
+          })
         }
       }
     })
@@ -28,28 +31,32 @@ class DataValidator {
   }
 
   _validate(attribute) {
-    this._validatePresence(attribute)
-    this._validateType(attribute)
-    this._validateInclusion(attribute)
+    let values = this.data[attribute]
+    if(!Array.isArray(values)) values = [values]
+    values.forEach(value => {
+      this._validatePresence(attribute, value)
+      this._validateType(attribute, value)
+      this._validateInclusion(attribute, value)
+    })
   }
 
-  _validatePresence(attribute) {
+  _validatePresence(attribute, value) {
     const nullable = this._nullable(attribute)
-    const isValid = PresenceValidator.call(this.data[attribute], nullable)
+    const isValid = PresenceValidator.call(value, nullable)
     if (!isValid) this._addError(attribute, 'must be given')
   }
 
-  _validateType(attribute) {
+  _validateType(attribute, value) {
     const type = this._type(attribute)
     if(typeof type === 'object') return
     const validator = TypeValidator.typeValidatorFor(type)
-    const validType = validator(this.data[attribute], this.model[attribute])
+    const validType = validator(value, this.model[attribute])
     if(!validType) this._addError(attribute, 'is not valid')
   }
 
-  _validateInclusion(attribute) {
+  _validateInclusion(attribute, value) {
     const list = this._inclusion(attribute)
-    const isIncluded = InclusionValidator.call(this.data[attribute], list)
+    const isIncluded = InclusionValidator.call(value, list)
     if (!isIncluded) this._addError(attribute, 'is not included in the list')
   }
 
