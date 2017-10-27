@@ -67,6 +67,7 @@ describe("TypeValidatorTest", () => {
       expect(TypeValidator.isDate('2017-01-01')).to.equal(true)
       expect(TypeValidator.isDate('01-01-2017')).to.equal(true)
       expect(TypeValidator.isDate('01/08/2017', { dateFormat: 'DD/MM/YYYY' })).to.equal(true)
+      expect(TypeValidator.isDate('01/08/2017', { dateFormat: 'YYYY-MM-DD' })).to.equal(false)
       expect(TypeValidator.isDate('2017-02-30')).to.equal(false)
       expect(TypeValidator.isDate('2017-13-01')).to.equal(false)
     })

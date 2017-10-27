@@ -34,7 +34,10 @@ const TypeValidator = {
     if(TypeValidator._isNullOrUndefined(data)) return true
     const dateFormat = rules.dateFormat;
     if (!dateFormat) return moment(data).isValid()
-    else return TypeValidator.isString(data, rules) && moment(data, dateFormat).isValid()
+    if(!TypeValidator.isString(data, rules) || !TypeValidator.isString(dateFormat)) return false
+    const date = moment(data, dateFormat)
+    if(!date.isValid()) return false
+    else return date.format(dateFormat) === data
   },
 
   _isNullOrUndefined(data) {

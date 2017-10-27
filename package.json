@@ -1,6 +1,6 @@
 {
   "name": "object-data-validator",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "JS Objects data validator",
   "main": "./build/index.js",
   "directories": {
