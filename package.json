@@ -1,6 +1,6 @@
 {
   "name": "object-data-validator",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "JS Objects data validator",
   "main": "./build/index.js",
   "directories": {
@@ -12,7 +12,7 @@
     "prepublish": "npm run build"
   },
   "author": "Facu Spagnuolo",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:facuspagnuolo/data-validator.git"
