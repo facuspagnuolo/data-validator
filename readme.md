@@ -23,6 +23,10 @@
       type: DataTypes.STRING,
       nullable: false,
     },
+    nicknames: {
+      type: DataTypes.STRING,
+      many: true,
+    },
     birthDate: {
       type: DataTypes.DATE,
       dateFormat: 'DD/MM/YYYY',
@@ -44,6 +48,7 @@
     name: 'Carlos',
     birthDate: '15/08/1991',
     verified: false,
+    nicknames: ['Perez', 'Sanchez'],
     document: {
       id: 1, 
       url: 'www.google.com'
