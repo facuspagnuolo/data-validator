@@ -70,7 +70,7 @@ class DataValidator {
   _validateUnknownFields() {
     const givenAttributes = Object.keys(this.data)
     const expectedAttributes = this._attributes()
-    if(_.isEqual(givenAttributes, expectedAttributes)) return
+    if(givenAttributes.every(attribute => _.includes(expectedAttributes, attribute))) return
     this._addError('model', 'has unknown attributes')
   }
 

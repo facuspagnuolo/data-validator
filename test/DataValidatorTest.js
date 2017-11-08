@@ -744,12 +744,21 @@ describe("DataValidatorTest", () => {
       describe('when rejectUnknownFields is set to true', () => {
         const model = {
           metadata: { rejectUnknownFields: true },
-          id: { type: DataTypes.INTEGER, nullable: false },
-          name: { type: DataTypes.STRING, nullable: false }
+          id: { type: DataTypes.INTEGER },
+          name: { type: DataTypes.STRING }
         }
 
         describe('when there are no extra attributes', () => {
           const data = { id: 1, name: 'charly' }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when there are missing arguments', () => {
+          const data = { id: 1 }
 
           it('does not return any errors', () => {
             const errors = validator(model, data).call()
