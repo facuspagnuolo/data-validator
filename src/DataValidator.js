@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const TypeValidator = require('./validators/TypeValidator')
 const PresenceValidator = require('./validators/PresenceValidator')
 const InclusionValidator = require('./validators/InclusionValidator')
@@ -10,6 +11,7 @@ class DataValidator {
   }
 
   call() {
+    this._validateMetadata()
     this._attributes().forEach(attribute => {
       const type = this._type(attribute)
       if(type === undefined) throw new Error(`Missing type for attribute '${attribute}'`)
@@ -60,6 +62,18 @@ class DataValidator {
     if (!isIncluded) this._addError(attribute, 'is not included in the list')
   }
 
+  _validateMetadata() {
+    const metadata = this._metadata()
+    if(metadata.rejectUnknownFields) this._validateUnknownFields()
+  }
+
+  _validateUnknownFields() {
+    const givenAttributes = Object.keys(this.data)
+    const expectedAttributes = this._attributes()
+    if(_.isEqual(givenAttributes, expectedAttributes)) return
+    this._addError('model', 'has unknown attributes')
+  }
+
   _type(attribute) {
     return this.model[attribute].type
   }
@@ -72,8 +86,12 @@ class DataValidator {
     return this.model[attribute].nullable
   }
 
+  _metadata() {
+    return this.model.metadata || {}
+  }
+
   _attributes() {
-    return Object.keys(this.model)
+    return Object.keys(_.omit(this.model, ['metadata']))
   }
 
   _addError(attribute, message) {

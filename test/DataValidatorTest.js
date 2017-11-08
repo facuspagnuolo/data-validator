@@ -662,6 +662,114 @@ describe("DataValidatorTest", () => {
     })
   })
 
+  describe('metadata', () => {
+    describe('ignore unknown fields', () => {
+      describe('when no metadata was given', () => {
+        const model = {
+          id: { type: DataTypes.INTEGER, nullable: false },
+          name: { type: DataTypes.STRING, nullable: false }
+        }
+
+        describe('when there are no extra attributes', () => {
+          const data = { id: 1, name: 'charly' }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when there is an extra attributes', () => {
+          const data = { id: 1, name: 'file', extra: true }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+      })
+
+      describe('when rejectUnknownFields is not set', () => {
+        const model = {
+          metadata: {},
+          id: { type: DataTypes.INTEGER, nullable: false },
+          name: { type: DataTypes.STRING, nullable: false }
+        }
+
+        describe('when there are no extra attributes', () => {
+          const data = { id: 1, name: 'charly' }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when there is an extra attributes', () => {
+          const data = { id: 1, name: 'file', extra: true }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+      })
+
+      describe('when rejectUnknownFields is set to false', () => {
+        const model = {
+          metadata: { rejectUnknownFields: false },
+          id: { type: DataTypes.INTEGER, nullable: false },
+          name: { type: DataTypes.STRING, nullable: false }
+        }
+
+        describe('when there are no extra attributes', () => {
+          const data = { id: 1, name: 'charly' }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when there is an extra attributes', () => {
+          const data = { id: 1, name: 'file', extra: true }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+      })
+
+      describe('when rejectUnknownFields is set to true', () => {
+        const model = {
+          metadata: { rejectUnknownFields: true },
+          id: { type: DataTypes.INTEGER, nullable: false },
+          name: { type: DataTypes.STRING, nullable: false }
+        }
+
+        describe('when there are no extra attributes', () => {
+          const data = { id: 1, name: 'charly' }
+
+          it('does not return any errors', () => {
+            const errors = validator(model, data).call()
+            expect(errors).to.equal(null)
+          })
+        })
+
+        describe('when there is an extra attributes', () => {
+          const data = { id: 1, name: 'file', extra: true }
+
+          it('returns an error', () => {
+            const errors = validator(model, data).call()
+            expect(errors.model).to.have.lengthOf(1)
+            expect(errors.model[0]).to.equal('has unknown attributes')
+          })
+        })
+      })
+    })
+  })
+
   function validator(model, data) {
     return new DataValidator(model, data)
   }
